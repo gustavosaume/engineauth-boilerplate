@@ -16,8 +16,8 @@ Quick start
 ===========
 * Clone the main repo
 * Clone engineauth submodule
-''git submodule init
-  git submodule update''
+``git submodule init
+  git submodule update``
 * Update your client keys
 * Start creating awesome apps. Have Fun
 
