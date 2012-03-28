@@ -1,0 +1,46 @@
+application: engineboilerplate
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: no
+
+builtins:
+- appstats: off
+- remote_api: on
+- deferred: on
+
+libraries:
+- name: jinja2
+  version: "latest"
+  
+handlers:
+- url: /favicon\.ico
+  static_files: static/favicon.ico
+  upload: static/favicon.ico
+  mime_type: image/vnd.microsoft.icon
+
+- url: /apple-touch-icon(.*\.png)
+  static_files: static/apple-touch-icon\1
+  upload: static/apple-touch-icon.png
+
+- url: /(robots|humans)\.txt
+  static_files: static/\1.txt
+  upload: static/(robots|humans)\.txt
+
+- url: /crossdomain\.xml
+  static_files: static/crossdomain.xml
+  upload: static/crossdomain.xml
+
+- url: /img/(.*\.(gif|png|jpg))
+  static_files: static/img/\1
+  upload: static/img/(.*\.(gif|png|jpg))
+
+- url: /css
+  static_dir: static/css
+
+- url: /js
+  mime_type: text/javascript
+  static_dir: static/js
+
+- url: /.*
+  script: main.application

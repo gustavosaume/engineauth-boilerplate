@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% from "macros/form_macros.html" import bootstrap_form_field %}
+
+{% block content %}
+<!-- Main hero unit for a primary marketing message or call to action -->
+  <div class="hero-unit">
+    <h1>Welcome Back</h1>
+    <p>This is a test site to demonstrate the EngineAuth authentication flow.</p>
+    <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+  </div>
+
+  <!-- Example row of columns -->
+  <div class="row">
+    {% include "auth/engineauth_form.html" %}
+    
+    <div class="span6">
+        <h4>Update your data</h4>
+        <form class="well" action="" method="post">
+            {{ bootstrap_form_field(form.full_name) }}
+            {{ bootstrap_form_field(form.email) }}
+            <div>
+                <label>Emails: </label>
+                <ul>
+                {% for email in emails%}
+                    <li>{{ email.value }}</li>
+                {% else %}
+                    <li>No emails registered</li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="actions">
+                <input type="submit" value="Save Changes" class="btn primary" />
+            </div>
+        </form>
+    </div>        
+      
+    {% include "auth/datastore_display.html" %}
+  </div>
+{% endblock %}
