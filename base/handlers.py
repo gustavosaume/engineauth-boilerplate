@@ -81,6 +81,11 @@ class HomeHandler(BaseHandler):
         if self.user:
             return self.redirect_to('profile-me')
 
+        if not self.request.app.debug and self.request.scheme != 'https':
+            # allow only secure connections in home since the login
+            # from home is allowed (ssl doesn't work in dev environment)
+            return self.redirect(self.uri_for('home', _scheme='https'))
+        
         self.render_template('home.html')
 
 class ProfileHandler(BaseHandler):
