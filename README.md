@@ -23,7 +23,6 @@ Quick start
 
 -or-
 
-* Unzip it in root project folder
 * Download Zip from github
 * Unzip it in root project folder
 * Download Zip for engineauth - https://github.com/gustavosaume/engineauth
