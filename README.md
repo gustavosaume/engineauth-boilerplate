@@ -21,6 +21,14 @@ Quick start
 * Update your client keys
 * Start creating awesome apps. Have Fun
 
+-or-
+
+* Unzip it in root project folder
+* Download Zip from github
+* Unzip it in root project folder
+* Download Zip for engineauth - https://github.com/gustavosaume/engineauth
+* Unzip the files contents in yourproject/plugins/auth
+* And your're done
 
 Credits
 =======
