@@ -132,3 +132,7 @@ class LogoutHandler(BaseHandler):
     def get(self):
         self.response.delete_cookie('_eauth')
         return self.redirect_to('home')
+
+class EmailValidation(BaseHandler):
+    def get(self):
+        self.render_template('email-validation.html');
