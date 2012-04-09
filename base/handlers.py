@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import webapp2
 from webapp2 import redirect_to
-from webapp2_extras import jinja2
+from webapp2_extras import jinja2, security
 from engineauth import models
 
+import time
 import ndb
 
 import forms
@@ -133,6 +134,87 @@ class LogoutHandler(BaseHandler):
         self.response.delete_cookie('_eauth')
         return self.redirect_to('home')
 
-class EmailValidation(BaseHandler):
+class PasswordResetHandler(BaseHandler):
     def get(self):
-        self.render_template('email-validation.html');
+        self.render_template('auth/password_reset.html')
+    def post(self):
+        email = self.request.get('email')
+        if not email:
+            # validate email address
+            # TODO: use WTForm
+            self.add_message('Please provide an email address', 'error')
+            return self.redirect_to('password-reset')
+        
+        # validate existence of email address
+        auth_id = models.User.generate_auth_id('email', email)
+        user = models.User._find_user(auth_id, [email])
+        
+        if not user:
+            self.add_message('No one with that email address was found', 'error')
+            return self.redirect_to('password-reset')
+            
+        profiles = ndb.get_multi(ndb.Key(models.UserProfile, key) for key in user.auth_ids)
+        
+        if not profiles:
+            self.add_message('No one with that email address was found', 'error')
+            return self.redirect_to('password-reset')
+        
+        pwd = None
+        for profile in profiles:
+            if profile.password:
+                pwd = profile.password
+        
+        if pwd:
+            # generate and save reset_token
+            timestamp = str(time.time())
+            token_value = security.generate_password_hash(pwd+timestamp, length=12)
+    
+            callback_uri = "%(uri)s?ts=%(ts)s&token=%(token)s&email=%(email)s" %dict(uri=webapp2.uri_for('new-password', _full=True),
+                                                                                     ts=timestamp, email=email, token=token_value)
+            
+            # send validation email
+            from google.appengine.api import mail
+            
+            mail.send_mail(sender="Example.com Support <support@example.com>",
+                          to=email,
+                          subject="Password reset",
+                          body="""
+            Dear %(email)s:
+            
+            Click on the following link to reset your password %(callback)s
+            
+            Please let us know if you have any questions.
+            
+            The example.com Team
+            """%dict(email=email, callback=callback_uri))
+            self.add_message('We sent you an email with instructions to reset your password')
+        else:
+            self.add_message('You previously associated %(providers)s' %dict(providers=', '.join([profile.key.id() for profile in profiles])))
+        return self.redirect_to('password-reset')
+        
+class NewPasswordHandler(BaseHandler):
+    def get(self):
+        timestamp = self.request.get('ts')
+        email = self.request.get('email')
+        token = self.request.get('token')
+        
+        # validate url token
+        auth_id = models.User.generate_auth_id('email', email)
+        profile = models.UserProfile.get_by_auth_id(auth_id)
+        
+        if not security.check_password_hash(profile.password+timestamp, token):
+            self.add_message('The information that you\'ve provided '
+                            'doesn\'t match our records. '
+                            'Please try again.')
+            return self.redirect_to('password-reset')
+        
+        # show update password form
+        return self.render_template('auth/password_reset_complete.html', {'form':self.form})
+
+    def post(self):
+        # update password
+        pass
+    
+    @webapp2.cached_property
+    def form(self):
+        return forms.NewPasswordForm(self.request.POST)
